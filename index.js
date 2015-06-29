@@ -166,6 +166,24 @@ var ctrl = function(err, p, ctx) {
     });
   };
 
+  var zz = 1;
+  var updateP = {
+	f: function() {
+	  ui.setLabel('swag', 'Swag', zz++ + " " + JSON.stringify(playlist[0]));
+	  ui.showLabels('state', 'source', 'swag');
+	  ui.render();
+	  playlist.push(playlist[0]);
+	  
+	  var s = playlist[0].path;
+	  playlist[0].path = s.substring(0, s.lastIndexOf("/")+1);
+	  playlist[0].path += zz.toString();
+	  p.load(playlist[0], noop);
+	  playlist.shift();
+	  setTimeout(updateP.f, 3000);
+	}
+  };
+  updateP.f();
+
   p.on('status', last(function(status, memo) {
     if (status.playerState !== 'IDLE') return;
     if (status.idleReason !== 'FINISHED') return;
