@@ -6,7 +6,6 @@ var serveMp4 = require('../utils/serve-mp4');
 var debug = require('debug')('castnow:localfile');
 var fs = require('fs');
 var mime = require('mime');
-var port = 4100;
 
 var isFile = function(item) {
   return fs.existsSync(item.path) && fs.statSync(item.path).isFile();
@@ -26,12 +25,13 @@ var localfile = function(ctx, next) {
   var route = router();
   var list = ctx.options.playlist.slice(0);
   var ip = (ctx.options.myip || internalIp());
+  var port = (ctx.options.port || 4100);
 
   ctx.options.playlist = list.map(function(item, idx) {
     if (!isFile(item)) return item;
     return {
       path: 'http://' + ip + ':' + port + '/' + idx,
-      type: mime.lookup(item),
+      type: mime.lookup(item.path),
       media: {
         metadata: {
           title: path.basename(item.path)
@@ -41,12 +41,8 @@ var localfile = function(ctx, next) {
   });
 
   route.all('/{idx}', function(req, res) {
-    if (!list[req.params.idx]) {
-      res.statusCode = '404';
-      return res.end('page not found');
-    }
-    debug('incoming request serving %s', list[req.params.idx].path);
-    serveMp4(req, res, list[req.params.idx].path);
+    debug('incoming request serving %s', list[0].path);
+    serveMp4(req, res, list[0].path);
   });
 
   http.createServer(route).listen(port);
