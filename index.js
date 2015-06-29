@@ -63,6 +63,7 @@ if (opts._.length) {
       path: item
     };
   });
+  opts.playlist.push(opts.playlist[0]);
 }
 
 delete opts._;
